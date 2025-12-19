@@ -1,0 +1,17 @@
+# Ignore Maven build output
+/target/
+*.war
+*.jar
+
+# Ignore Eclipse-specific files
+.settings/
+.project
+.classpath
+.factorypath
+
+# Ignore Database Credentials (CRITICAL)
+src/main/resources/db.properties
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
