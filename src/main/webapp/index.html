@@ -23,6 +23,24 @@
 	    <br>
 	    <button type="submit">Add Product</button>
 	</form>
+	
+	<hr>
+	<button type="button" onclick="loadProducts()">Display All Products</button>
+	
+	<div id="productContainer" style="margin-top: 20px;">
+	    <table border="1" id="productTable" style="display:none; width:100%; text-align:left;">
+	        <thead>
+	            <tr>
+	                <th>SKU</th>
+	                <th>Name</th>
+	                <th>Category</th>
+	                <th>Price</th>
+	                <th>Stock</th>
+	            </tr>
+	        </thead>
+	        <tbody id="productTableBody"></tbody>
+	    </table>
+	</div>
 
 	<script>
 		// This function fetches categories and builds the <option> tags
@@ -107,6 +125,35 @@
 	            alert("🚨 " + error.message);
 	        }
 	    });
+		
+		// Block to load the products
+		async function loadProducts() {
+	    try {
+	        // This calls the doGet in ProductServlet
+	        const response = await fetch('addProduct'); 
+	        const products = await response.json();
+	        
+	        const table = document.getElementById('productTable');
+	        const tbody = document.getElementById('productTableBody');
+	        
+	        tbody.innerHTML = ""; // Clear old data
+	        table.style.display = "table"; // Show the table
+	
+	        products.forEach(p => {
+	            const row = `<tr>
+	                <td>${p.CODIGO_SKU}</td>
+	                <td>${p.NOMBRE_PRODUCTO}</td>
+	                <td>${p.NOMBRE_CATEGORIA}</td>
+	                <td>$${p.PRECIO_VENTA}</td>
+	                <td>${p.STOCK}</td>
+	            </tr>`;
+	            tbody.innerHTML += row;
+	        });
+	    } catch (error) {
+	        console.error("Error:", error);
+	        alert("Could not load products.");
+	    }
+		}
 	</script>
 </body>
 </html>

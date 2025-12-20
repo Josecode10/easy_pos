@@ -12,6 +12,9 @@ public class Product {
 	@SerializedName("CATEGORIA_ID")
     private int categoriaId;
 	
+	@SerializedName("NOMBRE_CATEGORIA")
+	private String nombreCategoria;
+	
 	@SerializedName("CODIGO_SKU")
     private String codigoSku;
 	
@@ -132,5 +135,13 @@ public class Product {
 	public void setStockMin(int stockMin) {
 		this.stockMin = stockMin;
 	}
-    
+
+	public String getNombreCategoria() {
+		return nombreCategoria;
+	}
+
+	public void setNombreCategoria(String nombreCategoria) {
+		this.nombreCategoria = nombreCategoria;
+	}
+	
 }

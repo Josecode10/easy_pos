@@ -3,6 +3,8 @@ package com.easypos.dao;
 import com.easypos.model.Product;
 import com.easypos.util.DBConnection;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductDAO {
     public boolean insertProduct(Product product) {
@@ -32,4 +34,32 @@ public class ProductDAO {
             return false;
         }
     }
+    
+    public List<Product> getAllProducts() {
+        List<Product> products = new ArrayList<>();
+        // Join 'producto' with 'categoria' to get the name
+        String sql = "SELECT p.*, c.NOMBRE_CATEGORIA " +
+                     "FROM producto p " +
+                     "INNER JOIN categoria c ON p.CATEGORIA_ID = c.CATEGORIA_ID";
+
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Product p = new Product();
+                p.setCodigoSku(rs.getString("CODIGO_SKU"));
+                p.setNombreProducto(rs.getString("NOMBRE_PRODUCTO"));
+                p.setPrecioVenta(rs.getBigDecimal("PRECIO_VENTA"));
+                p.setStockActual(rs.getInt("STOCK"));
+                // Map the joined name to our new attribute
+                p.setNombreCategoria(rs.getString("NOMBRE_CATEGORIA")); 
+                products.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+    
 }

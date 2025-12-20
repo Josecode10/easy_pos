@@ -63,4 +63,15 @@ public class ProductServlet extends HttpServlet {
         // 5. Send the JSON response back to JavaScript
         response.getWriter().write(gson.toJson(result));
     }
+    
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ProductDAO dao = new ProductDAO();
+        List<Product> list = dao.getAllProducts();
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        // Send the list as JSON back to the browser
+        response.getWriter().write(this.gson.toJson(list));
+    }
+    
 }
