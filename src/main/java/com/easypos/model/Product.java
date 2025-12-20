@@ -6,8 +6,11 @@ import com.google.gson.annotations.SerializedName;
 
 public class Product {
     // Attributes
+	@SerializedName("ID_PRODUCTO")
+    private int idProducto;
+	
 	@SerializedName("CATEGORIA_ID")
-    private int catagoriaId;
+    private int categoriaId;
 	
 	@SerializedName("CODIGO_SKU")
     private String codigoSku;
@@ -24,18 +27,54 @@ public class Product {
 	@SerializedName("PRECIO_COSTO")
     private BigDecimal precioCosto;
 	
-	@SerializedName("STOCK_ACTUAL")
+	@SerializedName("STOCK")
     private int stockActual;
 	
 	@SerializedName("STOCK_MIN")
     private int stockMin;
+	
+	// The Validation Method
+	public boolean isValid() {
+	    // 1. String Validation: SKU and Name cannot be null or just empty spaces
+	    if (codigoSku == null || codigoSku.trim().isEmpty()) return false;
+	    if (nombreProducto == null || nombreProducto.trim().isEmpty()) return false;
 
-	public int getCatagoriaId() {
-		return catagoriaId;
+	    // 2. BigDecimal Validation: Use compareTo for objects. 
+	    // val.compareTo(ZERO) < 0 means the value is negative.
+	    if (precioVenta == null || precioVenta.compareTo(BigDecimal.ZERO) < 0) return false;
+	    if (precioCosto == null || precioCosto.compareTo(BigDecimal.ZERO) < 0) return false;
+
+	    // 3. Integer Validation: These are primitives, so they are never null, just check range.
+	    if (stockActual < 0) return false;
+	    if (stockMin < 0) return false;
+	    
+	    // Category ID must be a valid positive ID (assuming IDs start at 1)
+	    if (categoriaId <= 0) return false;
+
+	    // 4. Business Logic (Optional but recommended): 
+	    // You usually don't want to sell something for less than it cost you!
+	    if (precioVenta.compareTo(precioCosto) < 0) {
+	        // You could allow this, but often it's a sign of a data entry error.
+	        // For now, let's just allow it or add a console warning.
+	    }
+	    return true; // If all checks pass
+	}
+	
+	public int getIdProducto() {
+		return idProducto;
 	}
 
-	public void setCatagoriaId(int catagoriaId) {
-		this.catagoriaId = catagoriaId;
+	public void setIdProducto(int idProducto) {
+		this.idProducto = idProducto;
+	}
+	
+	// Getters and setters
+	public int getCategoriaId() {
+		return categoriaId;
+	}
+
+	public void setCategoriaId(int catagoriaId) {
+		this.categoriaId = catagoriaId;
 	}
 
 	public String getCodigoSku() {

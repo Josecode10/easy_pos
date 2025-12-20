@@ -20,30 +20,47 @@ public class ProductServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // 1. Read the JSON from the request body and convert to Product object
-        // The ClassLoader and Gson will map fields like PRECIO_COSTO automatically
-        Product product = gson.fromJson(request.getReader(), Product.class);
-
-        // 2. Call the DAO to execute the SQL INSERT
-        ProductDAO dao = new ProductDAO();
-        boolean isSaved = dao.insertProduct(product);
-
-        // 3. Prepare a Map for the JSON response
-        Map<String, Object> jsonResponse = new HashMap<>();
-        if (isSaved) {
-            jsonResponse.put("success", true);
-            jsonResponse.put("message", "Product " + product.getNombreProducto() + " was saved successfully!");
-        } else {
-            jsonResponse.put("success", false);
-            jsonResponse.put("message", "Failed to save product. Check server logs.");
-        }
-
-        // 4. Send the JSON response back to the browser
+    	// 1. Set response type to JSON
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+
+        // 2. Read JSON from request and convert to Product object
+        Product product = gson.fromJson(request.getReader(), Product.class);
         
-        PrintWriter out = response.getWriter();
-        out.print(gson.toJson(jsonResponse));
-        out.flush();
+        // Prepare a response object (Map is easiest for this)
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // 3. BACKEND VALIDATION: Use the new isValid() method
+            if (product != null && product.isValid()) {
+                
+                ProductDAO dao = new ProductDAO();
+                boolean success = dao.insertProduct(product);
+
+                if (success) {
+                    response.setStatus(HttpServletResponse.SC_OK); // 200
+                    result.put("success", true);
+                    result.put("message", "Product " + product.getNombreProducto() + " saved successfully!");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // 500
+                    result.put("success", false);
+                    result.put("message", "Database error: Could not save product.");
+                }
+                
+            } else {
+                // 4. VALIDATION FAILED
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400
+                result.put("success", false);
+                result.put("message", "Invalid data: Please check prices, stock, and SKU.");
+            }
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            result.put("success", false);
+            result.put("message", "System Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 5. Send the JSON response back to JavaScript
+        response.getWriter().write(gson.toJson(result));
     }
 }

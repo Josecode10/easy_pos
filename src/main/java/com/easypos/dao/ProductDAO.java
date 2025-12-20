@@ -10,13 +10,13 @@ public class ProductDAO {
         String sql = "INSERT INTO producto (" +
                      "CATEGORIA_ID, CODIGO_SKU, NOMBRE_PRODUCTO, " +
                      "DESCRIPCION_PRODUCTO, PRECIO_VENTA, PRECIO_COSTO, " +
-                     "STOCK_ACTUAL, STOCK_MIN) " +
+                     "STOCK, STOCK_MIN) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DBConnection.getConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
-            ps.setInt(1, product.getCatagoriaId());
+            ps.setInt(1, product.getCategoriaId());
             ps.setString(2, product.getCodigoSku());
             ps.setString(3, product.getNombreProducto());
             ps.setString(4, product.getDescripcionProducto());

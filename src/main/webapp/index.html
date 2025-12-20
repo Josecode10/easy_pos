@@ -4,51 +4,109 @@
 <body>
     <h2>Add New Product</h2>
     <form id="productForm">
-    <input type="text" id="sku" placeholder="SKU Code" required><br>
-    <input type="text" id="nombre" placeholder="Product Name" required><br>
-    <textarea id="desc" placeholder="Description"></textarea><br>
-    
-    <input type="number" step="0.01" id="precioVenta" placeholder="Selling Price" required><br>
-    
-    <input type="number" step="0.01" id="precioCosto" placeholder="Cost Price" required><br>
-    
-    <input type="number" id="stockActual" placeholder="Initial Stock" required><br>
-    
-    <input type="number" id="stockMin" placeholder="Minimum Stock Level" required><br>
-    
-    <input type="number" id="catId" placeholder="Category ID (1, 2, etc)" required><br>
-    
-    <button type="submit">Add Product</button>
-</form>
+	    <input type="text" id="sku" placeholder="SKU Code" required><br>
+	    <input type="text" id="nombre" placeholder="Product Name" required><br>
+	    <textarea id="desc" placeholder="Description"></textarea><br>
+	    
+	    <input type="number" step="0.01" id="precioVenta" placeholder="Selling Price" required><br>
+	    
+	    <input type="number" step="0.01" id="precioCosto" placeholder="Cost Price" required><br>
+	    
+	    <input type="number" id="stockActual" placeholder="Initial Stock" required><br>
+	    
+	    <input type="number" id="stockMin" placeholder="Minimum Stock Level" required><br>
+	    
+	    <label>Category:</label><br>
+		<select id="catId" required>
+		    <option value="">Select a category</option>
+		</select><br>
+	    <br>
+	    <button type="submit">Add Product</button>
+	</form>
 
-    <script>
-    document.getElementById('productForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const productData = {
-            CODIGO_SKU: document.getElementById('sku').value,
-            NOMBRE_PRODUCTO: document.getElementById('nombre').value,
-            DESCRIPCION_PRODUCTO: document.getElementById('desc').value,
-            PRECIO_VENTA: parseFloat(document.getElementById('precioVenta').value),
-            PRECIO_COSTO: parseFloat(document.getElementById('precioCosto').value),
-            STOCK_ACTUAL: parseInt(document.getElementById('stockActual').value),
-            STOCK_MIN: parseInt(document.getElementById('stockMin').value),
-            CATEGORIA_ID: parseInt(document.getElementById('catId').value)
-        };
-
-        try {
-            const response = await fetch('addProduct', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(productData)
-            });
-            const result = await response.json();
-            alert(result.message);
-        } catch (error) {
-            console.error("Error:", error);
-            alert("Check the console for errors!");
-        }
-    });
-    </script>
+	<script>
+		// This function fetches categories and builds the <option> tags
+		async function populateCategories() {
+		    const select = document.getElementById('catId');
+		    
+		    try {
+		        const response = await fetch('./getCategories');
+		        const categories = await response.json();
+		
+		        categories.forEach(cat => {
+		            const option = document.createElement('option');
+		            option.value = cat.CATEGORIA_ID;        // The auto-incremented ID (e.g., 1)
+		            option.textContent = cat.NOMBRE_CATEGORIA; // The text the user sees (e.g., "Electronics")
+		            select.appendChild(option);
+		        });
+		    } catch (error) {
+		        console.error("Error loading categories:", error);
+		    }
+		}
+		
+		// Ensure categories load as soon as the page is ready
+		document.addEventListener('DOMContentLoaded', populateCategories);
+		
+	
+		// This block gets on when the user clicks on "submit" button
+	    document.getElementById('productForm').addEventListener('submit', async (e) => {
+	        // STOP the page from refreshing (which is the default behavior of forms)
+	        e.preventDefault();
+	
+	        // COLLECT all the data from your input boxes
+	        const productData = {
+	            CODIGO_SKU: document.getElementById('sku').value,
+	            NOMBRE_PRODUCTO: document.getElementById('nombre').value,
+	            DESCRIPCION_PRODUCTO: document.getElementById('desc').value,
+	            PRECIO_VENTA: parseFloat(document.getElementById('precioVenta').value),
+	            PRECIO_COSTO: parseFloat(document.getElementById('precioCosto').value),
+	            STOCK: parseInt(document.getElementById('stockActual').value),
+	            STOCK_MIN: parseInt(document.getElementById('stockMin').value),
+	            CATEGORIA_ID: parseInt(document.getElementById('catId').value)
+	        };
+	
+	        // FRONTEND VALIDATION 
+	        if (productData.PRECIO_VENTA < 0 || productData.PRECIO_COSTO < 0) {
+	            alert("❌ Error: Prices cannot be negative.");
+	            return; // Stop right here, don't send anything to the server
+	        }
+	
+	        if (productData.STOCK < 0 || productData.STOCK_MIN < 0) {
+	            alert("❌ Error: Stock levels cannot be negative.");
+	            return;
+	        }
+	
+	        // SEND the data to your Java Servlet (The "Postman")
+	        try {
+	            // Show a "Loading" state in the console
+	            console.log("Attempting to save:", productData);
+	
+	            const response = await fetch('addProduct', {
+	                method: 'POST',
+	                headers: { 'Content-Type': 'application/json' },
+	                // Turn the JavaScript object into a JSON string
+	                body: JSON.stringify(productData)
+	            });
+	
+	            // HANDLE the response from the Java Servlet
+	            if (!response.ok) {
+	                // If the server sent a 400 or 500 error
+	                const errorData = await response.json();
+	                throw new Error(errorData.message || "Server Error");
+	            }
+	
+	            const result = await response.json();
+	            
+	            // Success! Clear the form so the user can add another product
+	            alert("✅ " + result.message);
+	            document.getElementById('productForm').reset();
+	
+	        } catch (error) {
+	            // If the internet is down or the server crashed
+	            console.error("Connection Error:", error);
+	            alert("🚨 " + error.message);
+	        }
+	    });
+	</script>
 </body>
 </html>
