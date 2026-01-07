@@ -26,6 +26,7 @@ public class ProductDAO {
             ps.setInt(7, product.getStockActual());
             ps.setInt(8, product.getStockMin());
             
+            // Return true if at least one row was updated
             return ps.executeUpdate() > 0;
             
         } catch (SQLException e) {
