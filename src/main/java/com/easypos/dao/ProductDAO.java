@@ -8,13 +8,12 @@ import java.util.List;
 
 public class ProductDAO {
     public boolean insertProduct(Product product) {
-        // Complete SQL matching your image schema
+        // Create the string will become an SQL statement
         String sql = "INSERT INTO producto (" +
                      "CATEGORIA_ID, CODIGO_SKU, NOMBRE_PRODUCTO, " +
                      "DESCRIPCION_PRODUCTO, PRECIO_VENTA, PRECIO_COSTO, " +
                      "STOCK, STOCK_MIN) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        
         try (Connection conn = DBConnection.getConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
             

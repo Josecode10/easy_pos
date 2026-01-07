@@ -21,8 +21,8 @@ public class ProductServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     	// 1. Set response type to JSON
+    	response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
 
         // 2. Read JSON from request and convert to Product object
         Product product = gson.fromJson(request.getReader(), Product.class);

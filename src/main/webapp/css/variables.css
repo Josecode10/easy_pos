@@ -1,0 +1,10 @@
+:root {
+    --color-base: #00ADB5; /* fondo general para el body */
+    --primario: #696969; /* encabezado, barra lateral, texto primario */
+    --fondo-principal: #F5F5F5; /* para la sección principal */
+    --secundario: #A9A9A9; /* texto secundario, iconos, bordes */
+    --acentuador: #FFB600; /* para botones */
+    --acentuador-peligro: #E74C3C; /* para botones de acciones importantes */
+    --variantes: #DCEFEF; /*  */
+    --basico: #000;
+}

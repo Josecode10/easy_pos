@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class DBConnection {
+	// Create a Properties object (Map) to handle 
+	// the .properties file where the database data
+	// is stored is pairs (key=value)
     private static final Properties props = new Properties();
 
     static {

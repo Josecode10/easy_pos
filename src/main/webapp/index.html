@@ -1,159 +1,94 @@
 <!DOCTYPE html>
-<html>
-<head><title>Easy POS - Add Product</title></head>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/b2541f8c7c.js" crossorigin="anonymous"></script>
+    <title>inicio</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
 <body>
-    <h2>Add New Product</h2>
-    <form id="productForm">
-	    <input type="text" id="sku" placeholder="SKU Code" required><br>
-	    <input type="text" id="nombre" placeholder="Product Name" required><br>
-	    <textarea id="desc" placeholder="Description"></textarea><br>
-	    
-	    <input type="number" step="0.01" id="precioVenta" placeholder="Selling Price" required><br>
-	    
-	    <input type="number" step="0.01" id="precioCosto" placeholder="Cost Price" required><br>
-	    
-	    <input type="number" id="stockActual" placeholder="Initial Stock" required><br>
-	    
-	    <input type="number" id="stockMin" placeholder="Minimum Stock Level" required><br>
-	    
-	    <label>Category:</label><br>
-		<select id="catId" required>
-		    <option value="">Select a category</option>
-		</select><br>
-	    <br>
-	    <button type="submit">Add Product</button>
-	</form>
-	
-	<hr>
-	<button type="button" onclick="loadProducts()">Display All Products</button>
-	
-	<div id="productContainer" style="margin-top: 20px;">
-	    <table border="1" id="productTable" style="display:none; width:100%; text-align:left;">
-	        <thead>
-	            <tr>
-	                <th>SKU</th>
-	                <th>Name</th>
-	                <th>Category</th>
-	                <th>Price</th>
-	                <th>Stock</th>
-	            </tr>
-	        </thead>
-	        <tbody id="productTableBody"></tbody>
-	    </table>
-	</div>
+    <main class="contenedor-principal">
+        <header class="encabezado">
+            <div class="logo-pos">
+                <a href="#">
+                    <i class="fa-solid fa-bag-shopping"></i><br>
+                    PTO VENTA
+                </a>
+            </div>
+            <div class="contenedor-enlaces">
+                <a href="products.html" class="enlaces">
+                    <i class="fa-solid fa-box-open"></i><br>
+                    Productos
+                </a>
+                <a href="ventas.html" class="enlaces">
+                    <i class="fa-solid fa-dolly"></i><br>
+                    Ventas
+                </a>
+                <a href="#" class="enlaces">
+                    <i class="fa-solid fa-user-plus"></i><br>
+                    Clientes
+                </a>
+                <a href="#" class="enlaces">
+                    <i class="fa-regular fa-file"></i><br>
+                    Reportes
+                </a>
+                <a href="#" class="enlaces">
+                    <i class="fa-solid fa-user-gear"></i><br>
+                    Configuración
+                </a>
+            </div>
 
-	<script>
-		// This function fetches categories and builds the <option> tags
-		async function populateCategories() {
-		    const select = document.getElementById('catId');
-		    
-		    try {
-		        const response = await fetch('./getCategories');
-		        const categories = await response.json();
-		
-		        categories.forEach(cat => {
-		            const option = document.createElement('option');
-		            option.value = cat.CATEGORIA_ID;        // The auto-incremented ID (e.g., 1)
-		            option.textContent = cat.NOMBRE_CATEGORIA; // The text the user sees (e.g., "Electronics")
-		            select.appendChild(option);
-		        });
-		    } catch (error) {
-		        console.error("Error loading categories:", error);
-		    }
-		}
-		
-		// Ensure categories load as soon as the page is ready
-		document.addEventListener('DOMContentLoaded', populateCategories);
-		
-	
-		// This block gets on when the user clicks on "submit" button
-	    document.getElementById('productForm').addEventListener('submit', async (e) => {
-	        // STOP the page from refreshing (which is the default behavior of forms)
-	        e.preventDefault();
-	
-	        // COLLECT all the data from your input boxes
-	        const productData = {
-	            CODIGO_SKU: document.getElementById('sku').value,
-	            NOMBRE_PRODUCTO: document.getElementById('nombre').value,
-	            DESCRIPCION_PRODUCTO: document.getElementById('desc').value,
-	            PRECIO_VENTA: parseFloat(document.getElementById('precioVenta').value),
-	            PRECIO_COSTO: parseFloat(document.getElementById('precioCosto').value),
-	            STOCK: parseInt(document.getElementById('stockActual').value),
-	            STOCK_MIN: parseInt(document.getElementById('stockMin').value),
-	            CATEGORIA_ID: parseInt(document.getElementById('catId').value)
-	        };
-	
-	        // FRONTEND VALIDATION 
-	        if (productData.PRECIO_VENTA < 0 || productData.PRECIO_COSTO < 0) {
-	            alert("❌ Error: Prices cannot be negative.");
-	            return; // Stop right here, don't send anything to the server
-	        }
-	
-	        if (productData.STOCK < 0 || productData.STOCK_MIN < 0) {
-	            alert("❌ Error: Stock levels cannot be negative.");
-	            return;
-	        }
-	
-	        // SEND the data to your Java Servlet (The "Postman")
-	        try {
-	            // Show a "Loading" state in the console
-	            console.log("Attempting to save:", productData);
-	
-	            const response = await fetch('addProduct', {
-	                method: 'POST',
-	                headers: { 'Content-Type': 'application/json' },
-	                // Turn the JavaScript object into a JSON string
-	                body: JSON.stringify(productData)
-	            });
-	
-	            // HANDLE the response from the Java Servlet
-	            if (!response.ok) {
-	                // If the server sent a 400 or 500 error
-	                const errorData = await response.json();
-	                throw new Error(errorData.message || "Server Error");
-	            }
-	
-	            const result = await response.json();
-	            
-	            // Success! Clear the form so the user can add another product
-	            alert("✅ " + result.message);
-	            document.getElementById('productForm').reset();
-	
-	        } catch (error) {
-	            // If the internet is down or the server crashed
-	            console.error("Connection Error:", error);
-	            alert("🚨 " + error.message);
-	        }
-	    });
-		
-		// Block to load the products
-		async function loadProducts() {
-	    try {
-	        // This calls the doGet in ProductServlet
-	        const response = await fetch('addProduct'); 
-	        const products = await response.json();
-	        
-	        const table = document.getElementById('productTable');
-	        const tbody = document.getElementById('productTableBody');
-	        
-	        tbody.innerHTML = ""; // Clear old data
-	        table.style.display = "table"; // Show the table
-	
-	        products.forEach(p => {
-	            const row = `<tr>
-	                <td>${p.CODIGO_SKU}</td>
-	                <td>${p.NOMBRE_PRODUCTO}</td>
-	                <td>${p.NOMBRE_CATEGORIA}</td>
-	                <td>$${p.PRECIO_VENTA}</td>
-	                <td>${p.STOCK}</td>
-	            </tr>`;
-	            tbody.innerHTML += row;
-	        });
-	    } catch (error) {
-	        console.error("Error:", error);
-	        alert("Could not load products.");
-	    }
-		}
-	</script>
+        </header>
+        
+        <section class="principal">
+            <div class="principal-izquierda">
+                <div class="principal-izquierda-texto">
+                    <h2>Bienvenido al Punto de Venta</h2>
+                    <h4>Tu aliado para gestionar tu negocio</h4>
+                    <p>Puedes hacer clic en un módulo para empezar o navegar por tu punto de venta.</p>
+                </div>
+                <div class="principal-izquierda-botones">
+                    <input type="button" class="principal-boton" value="Nueva venta +">
+                    <input type="button" class="principal-boton" value="Agregar producto +">
+                    <input type="button" class="principal-boton" value="Agregar cliente +">
+                </div>
+            </div>
+            <div class="principal-derecha">
+                <div class="principal-derecha notificaciones">
+                    <a href="#"><i class="fa-solid fa-bell"></i></a>
+                </div>
+                <div class="principal-derecha">
+                    <a href="#">
+                        <button class="ayuda boton">¿Necesitas ayuda?</button>
+                    </a>
+                </div>
+                <div class="principal-derecha">
+                    <a href="ingresar.html">
+                        <button class="cerrar boton">Cerrar sesión</button>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <footer class="pie pagina">
+            <div class="contenedor-logo-empresa enlaces-pie">
+                <img src="img/tech_sol_logo.png" alt="logo_emp" class="logo-empresa">
+                <a href="#" class="enlace-empresa">¿Quienes somos?</a>
+            </div>
+            <div class="contenedor-email enlaces-pie">
+                <a href="mailto:contacto@techsolutions.com">Contáctanos  <i><i class="fa-regular fa-envelope"></i></i></a>
+            </div>
+            <div class="contenedor-redes-sociales enlaces-pie">
+                <a target="_blank" href="https://www.facebook.com/"><i class="fa-brands fa-facebook"></i></a>
+                <a target="_blank" href="https://x.com/"><i class="fa-brands fa-twitter"></i></a>
+                <a target="_blank" href="https://web.whatsapp.com/"><i class="fa-brands fa-whatsapp"></i></a>
+                <a target="_blank" href="https://www.instagram.com/"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+        </footer>
+    </main>
 </body>
 </html>
