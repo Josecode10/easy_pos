@@ -3,6 +3,7 @@
  * 1. UI INITIALIZATION & EVENT LISTENERS
  * ============================================================
  * These lines run as soon as the browser finishes reading the HTML.
+ * This is the bridge between frontend and backend
  */
 
 // Loads the categories into the <select> dropdown automatically on page load
@@ -12,7 +13,7 @@ populateCategories();
 document.getElementById('productForm').addEventListener('submit', handleFormSubmit);
 
 // Watches the Button: When "Display All Products" is clicked, fetch and show the table
-document.getElementById('btnLoad').addEventListener('click', loadProducts);
+document.getElementById('loadProducts').addEventListener('click', loadProducts);
 
 
 /**
@@ -30,13 +31,14 @@ async function populateCategories() {
     try {
         // Fetch data from the GetCategoriesServlet
         const response = await fetch('./getCategories');
+		// Expects a JSON array
         const categories = await response.json();
 
         // Loop through each category and create a new <option> element
         categories.forEach(cat => {
             const option = document.createElement('option');
-            option.value = cat.CATEGORIA_ID;        // Value sent to database (ID)
-            option.textContent = cat.NOMBRE_CATEGORIA; // Text shown to user (Name)
+            option.value = cat.CATEGORIA_ID;        // THe cat ID will be the option value
+            option.textContent = cat.NOMBRE_CATEGORIA; // Text shown to user
             select.appendChild(option);
         });
     } catch (error) {
@@ -76,17 +78,19 @@ async function handleFormSubmit(event) {
 
     // --- SERVER COMMUNICATION ---
     try {
+		// Helps you verify what’s being sent before the request is made
         console.log("Attempting to save to database:", productData);
 
-        // Send the data to the 'addProduct' Servlet using a POST request
+		// HTTP POST request to ProductServlet
         const response = await fetch('addProduct', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+			
+            method: 'POST', // tells the server this is a create action
+            headers: { 'Content-Type': 'application/json' }, // Tells the server the body is JSON.
             body: JSON.stringify(productData) // Convert JS Object to JSON string
         });
 
         // Check if the server responded with an error (like 400 or 500)
-        if (!response.ok) {
+        if (!response.ok) { // boolean that’s true if the status code is 200–299
             const errorData = await response.json();
             throw new Error(errorData.message || "Server Error");
         }
