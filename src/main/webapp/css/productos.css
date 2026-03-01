@@ -139,3 +139,22 @@ td {
 tr:hover {
     background-color: #f9f9f9;
 }
+
+.btn-edit { 
+	background-color: #f39c12; 
+	color: white; 
+	border: none; 
+	padding: 5px 10px; 
+	cursor: pointer; 
+	border-radius: 4px; 
+}
+
+.btn-delete { 
+	background-color: #e74c3c; 
+	color: white; 
+	border: none; 
+	padding: 5px 10px; 
+	cursor: pointer; 
+	border-radius: 4px; 
+	margin-left: 5px; 
+}

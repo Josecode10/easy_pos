@@ -6,6 +6,10 @@
  * This is the bridge between frontend and backend
  */
 
+// Track which mode the form is in
+let isEditMode = false;
+let editingSku = null; // Stores the SKU of the product being edited
+
 // Loads the categories into the <select> dropdown automatically on page load
 populateCategories();
 
@@ -50,10 +54,10 @@ async function populateCategories() {
  * Handles the logic when a user submits the "Add New Product" form.
  */
 async function handleFormSubmit(event) {
-    // Prevent the browser from refreshing the page (default form behavior)
+    // 1. Prevent page refresh
     event.preventDefault();
 
-    // Gather data from all input fields and store them in a single JavaScript Object
+    // 2. Gather data
     const productData = {
         CODIGO_SKU: document.getElementById('sku').value,
         NOMBRE_PRODUCTO: document.getElementById('nombre').value,
@@ -65,43 +69,45 @@ async function handleFormSubmit(event) {
         CATEGORIA_ID: parseInt(document.getElementById('catId').value)
     };
 
-    // --- FRONTEND VALIDATION ---
-    // Stop the process early if the user entered negative numbers
-    if (productData.PRECIO_VENTA < 0 || productData.PRECIO_COSTO < 0) {
-        alert("Error: Prices cannot be negative.");
-        return; 
-    }
-    if (productData.STOCK < 0 || productData.STOCK_MIN < 0) {
-        alert("Error: Stock levels cannot be negative.");
+    // 3. Frontend Validation
+    if (productData.PRECIO_VENTA < 0 || productData.PRECIO_COSTO < 0 || 
+        productData.STOCK < 0 || productData.STOCK_MIN < 0) {
+        alert("🚨 Error: Values cannot be negative.");
         return;
     }
 
-    // --- SERVER COMMUNICATION ---
+    // 4. Single Server Communication block
     try {
-		// Helps you verify what’s being sent before the request is made
-        console.log("Attempting to save to database:", productData);
+        // Determine method based on state
+        const method = isEditMode ? 'PUT' : 'POST';
+        
+        console.log(`Attempting ${method} request:`, productData);
 
-		// HTTP POST request to ProductServlet
-        const response = await fetch('addProduct', {
-			
-            method: 'POST', // tells the server this is a create action
-            headers: { 'Content-Type': 'application/json' }, // Tells the server the body is JSON.
-            body: JSON.stringify(productData) // Convert JS Object to JSON string
+        const response = await fetch('manageProduct', {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(productData)
         });
 
-        // Check if the server responded with an error (like 400 or 500)
-        if (!response.ok) { // boolean that’s true if the status code is 200–299
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Server Error");
+        // Parse JSON once
+        const result = await response.json();
+
+        // Check for server-side errors (400, 500, etc.)
+        if (!response.ok) {
+            throw new Error(result.message || "Server Error");
         }
 
-        // If successful, tell the user and clear the form fields
-        const result = await response.json();
+        // 5. Success Handling
         alert("✅ " + result.message);
-        document.getElementById('productForm').reset();
+        
+        // Reset form and UI state
+        resetForm(); 
+        
+        // Refresh the product list automatically
+        loadProducts(); 
 
     } catch (error) {
-        console.error("Connection Error:", error);
+        console.error("Connection/Server Error:", error);
         alert("🚨 " + error.message);
     }
 }
@@ -111,41 +117,73 @@ async function handleFormSubmit(event) {
  */
 async function loadProducts() {
     try {
-        // Request the list of products (Standard GET request)
-        const response = await fetch('addProduct'); 
+        const response = await fetch('manageProduct'); 
         const products = await response.json();
         
         const table = document.getElementById('productTable');
         const tbody = document.getElementById('productTableBody');
-        
-        // 1. Clear any old rows currently in the table
         tbody.innerHTML = ""; 
-        
-        // 2. Make the table visible (it's hidden by default in CSS)
         table.style.display = "table"; 
 
-        // 3. Loop through each product and build an HTML row
         products.forEach(p => {
+            // Create the row with two action buttons
             const row = `<tr>
                 <td>${p.CODIGO_SKU}</td>
                 <td>${p.NOMBRE_PRODUCTO}</td>
                 <td>${p.NOMBRE_CATEGORIA}</td>
                 <td>$${parseFloat(p.PRECIO_VENTA).toFixed(2)}</td>
                 <td>${p.STOCK}</td>
+                <td>
+                    <button class="btn-edit" onclick="prepareEdit('${p.CODIGO_SKU}', '${p.NOMBRE_PRODUCTO}', '${p.DESCRIPCION_PRODUCTO || ''}', ${p.PRECIO_VENTA}, ${p.PRECIO_COSTO}, ${p.STOCK}, ${p.STOCK_MIN}, ${p.CATEGORIA_ID})">Edit</button>
+                    <button class="btn-delete" onclick="deleteProduct('${p.CODIGO_SKU}')">Delete</button>
+                </td>
             </tr>`;
-            // Append the row to the table body
             tbody.innerHTML += row;
         });
     } catch (error) {
         console.error("Error:", error);
-        alert("Could not load products.");
     }
 }
 
 async function deleteProduct(sku) {
     if (confirm(`Are you sure you want to delete SKU: ${sku}?`)) {
-        const resp = await fetch(`addProduct?sku=${sku}`, { method: 'DELETE' });
+        const resp = await fetch(`manageProduct?sku=${sku}`, { method: 'DELETE' });
         const result = await resp.json();
         if (result.success) loadProducts(); // Refresh table
     }
+}
+
+function prepareEdit(sku, nombre, desc, pVenta, pCosto, stock, stockMin, catId) {
+    isEditMode = true;
+    editingSku = sku;
+
+    // Fill form fields
+    document.getElementById('sku').value = sku;
+    document.getElementById('sku').disabled = true; // SKU usually shouldn't be edited
+    document.getElementById('nombre').value = nombre;
+    document.getElementById('desc').value = desc;
+    document.getElementById('precioVenta').value = pVenta;
+    document.getElementById('precioCosto').value = pCosto;
+    document.getElementById('stockActual').value = stock;
+    document.getElementById('stockMin').value = stockMin;
+    document.getElementById('catId').value = catId;
+
+    // Change UI to reflect Edit Mode
+    const submitBtn = document.querySelector('#productForm .btn-primary');
+    submitBtn.textContent = "Update Product";
+    submitBtn.style.backgroundColor = "#f39c12"; // Optional: Change color to orange
+
+    // Scroll to the top so the user sees the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetForm() {
+    isEditMode = false;
+    editingSku = null;
+    document.getElementById('productForm').reset();
+    document.getElementById('sku').disabled = false;
+    
+    const submitBtn = document.querySelector('#productForm .btn-primary');
+    submitBtn.textContent = "Add Product";
+    submitBtn.style.backgroundColor = ""; // Reset to original CSS
 }

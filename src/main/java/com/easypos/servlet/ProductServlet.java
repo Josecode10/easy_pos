@@ -12,88 +12,107 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 
-@WebServlet("/addProduct") // This URL must match your JS fetch('addProduct')
+@WebServlet("/manageProduct") 
 public class ProductServlet extends HttpServlet {
     
-    // Create one instance of Gson to reuse
     private final Gson gson = new Gson();
 
+    // CREATE: Handles saving a brand new product
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    	// 1. Set response type to JSON
-    	response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json");
-
-        // 2. Read JSON from request and convert to Product object
+        setupResponse(response);
         Product product = gson.fromJson(request.getReader(), Product.class);
-        
-        // Prepare a response object (Map is easiest for this)
         Map<String, Object> result = new HashMap<>();
 
         try {
-            // 3. BACKEND VALIDATION: Use the new isValid() method
             if (product != null && product.isValid()) {
-                
                 ProductDAO dao = new ProductDAO();
                 boolean success = dao.insertProduct(product);
 
                 if (success) {
-                    response.setStatus(HttpServletResponse.SC_OK); // 200
+                    response.setStatus(HttpServletResponse.SC_OK);
                     result.put("success", true);
                     result.put("message", "Product " + product.getNombreProducto() + " saved successfully!");
                 } else {
-                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // 500
+                    // This is where your previous error message came from
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     result.put("success", false);
-                    result.put("message", "Database error: Could not save product.");
+                    result.put("message", "Database error: Could not save product. Check if SKU already exists.");
                 }
-                
             } else {
-                // 4. VALIDATION FAILED
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 result.put("success", false);
-                result.put("message", "Invalid data: Please check prices, stock, and SKU.");
+                result.put("message", "Invalid data: Please check prices and stock.");
             }
         } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            result.put("success", false);
-            result.put("message", "System Error: " + e.getMessage());
-            e.printStackTrace();
+            sendError(response, result, e);
         }
-
-        // 5. Send the JSON response back to JavaScript
         response.getWriter().write(gson.toJson(result));
     }
-    
+
+    // READ: Handles fetching the list of products
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        setupResponse(response);
         ProductDAO dao = new ProductDAO();
         List<Product> list = dao.getAllProducts();
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        // Send the list as JSON back to the browser
         response.getWriter().write(this.gson.toJson(list));
     }
-    
+
+    // UPDATE: Handles updating an existing product
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        setupResponse(response);
         Product product = gson.fromJson(request.getReader(), Product.class);
-        ProductDAO dao = new ProductDAO();
-        boolean success = dao.updateProduct(product);
-        
-        response.setContentType("application/json");
-        Map<String, Object> res = new HashMap<>();
-        res.put("success", success);
-        response.getWriter().write(gson.toJson(res));
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            if (product != null && product.isValid()) {
+                ProductDAO dao = new ProductDAO();
+                boolean success = dao.updateProduct(product); // Ensure this method exists in ProductDAO
+
+                if (success) {
+                    result.put("success", true);
+                    result.put("message", "Product updated successfully!");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    result.put("success", false);
+                    result.put("message", "Update failed: Product not found.");
+                }
+            }
+        } catch (Exception e) {
+            sendError(response, result, e);
+        }
+        response.getWriter().write(gson.toJson(result));
     }
 
+    // DELETE: Handles removing a product via SKU
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String sku = request.getParameter("sku"); // Get SKU from URL ?sku=123
-        ProductDAO dao = new ProductDAO();
-        boolean success = dao.deleteProduct(sku);
+        setupResponse(response);
+        String sku = request.getParameter("sku");
+        Map<String, Object> result = new HashMap<>();
+
+        if (sku != null && !sku.isEmpty()) {
+            ProductDAO dao = new ProductDAO();
+            boolean success = dao.deleteProduct(sku); // Ensure this method exists in ProductDAO
+            result.put("success", success);
+            result.put("message", success ? "Product deleted." : "Delete failed.");
+        }
         
-        response.setContentType("application/json");
-        response.getWriter().write("{\"success\":" + success + "}");
+        response.getWriter().write(gson.toJson(result));
     }
-    
+
+    // Helper to keep code DRY (Don't Repeat Yourself)
+    private void setupResponse(HttpServletResponse response) {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+    }
+
+    private void sendError(HttpServletResponse response, Map<String, Object> result, Exception e) {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        result.put("success", false);
+        result.put("message", "System Error: " + e.getMessage());
+        e.printStackTrace();
+    }
 }
