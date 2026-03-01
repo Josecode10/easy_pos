@@ -141,3 +141,11 @@ async function loadProducts() {
         alert("Could not load products.");
     }
 }
+
+async function deleteProduct(sku) {
+    if (confirm(`Are you sure you want to delete SKU: ${sku}?`)) {
+        const resp = await fetch(`addProduct?sku=${sku}`, { method: 'DELETE' });
+        const result = await resp.json();
+        if (result.success) loadProducts(); // Refresh table
+    }
+}

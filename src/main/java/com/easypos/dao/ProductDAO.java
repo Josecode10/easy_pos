@@ -62,4 +62,36 @@ public class ProductDAO {
         return products;
     }
     
+    public boolean updateProduct(Product product) {
+        String sql = "UPDATE producto SET CATEGORIA_ID=?, NOMBRE_PRODUCTO=?, DESCRIPCION_PRODUCTO=?, " +
+                     "PRECIO_VENTA=?, PRECIO_COSTO=?, STOCK=?, STOCK_MIN=? WHERE CODIGO_SKU=?";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, product.getCategoriaId());
+            ps.setString(2, product.getNombreProducto());
+            ps.setString(3, product.getDescripcionProducto());
+            ps.setBigDecimal(4, product.getPrecioVenta());
+            ps.setBigDecimal(5, product.getPrecioCosto());
+            ps.setInt(6, product.getStockActual());
+            ps.setInt(7, product.getStockMin());
+            ps.setString(8, product.getCodigoSku()); // The identifier
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteProduct(String sku) {
+        String sql = "DELETE FROM producto WHERE CODIGO_SKU = ?";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, sku);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
 }

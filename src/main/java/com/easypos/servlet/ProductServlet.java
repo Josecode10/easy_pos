@@ -74,4 +74,26 @@ public class ProductServlet extends HttpServlet {
         response.getWriter().write(this.gson.toJson(list));
     }
     
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Product product = gson.fromJson(request.getReader(), Product.class);
+        ProductDAO dao = new ProductDAO();
+        boolean success = dao.updateProduct(product);
+        
+        response.setContentType("application/json");
+        Map<String, Object> res = new HashMap<>();
+        res.put("success", success);
+        response.getWriter().write(gson.toJson(res));
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String sku = request.getParameter("sku"); // Get SKU from URL ?sku=123
+        ProductDAO dao = new ProductDAO();
+        boolean success = dao.deleteProduct(sku);
+        
+        response.setContentType("application/json");
+        response.getWriter().write("{\"success\":" + success + "}");
+    }
+    
 }
