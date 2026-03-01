@@ -17,16 +17,6 @@ body {
     color: var(--basico);
 }
 
-.encabezado {
-    background-color: var(--primario);
-    grid-column: 1 / span 30;
-    grid-row: 1 / 6;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-}
 .encabezado a, .enlaces-pie a {
     text-decoration: none;
     color: var(--variantes);

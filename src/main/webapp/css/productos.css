@@ -9,7 +9,6 @@
     font-family: 'Montserrat', sans-serif;
     justify-content: center;
     align-items: center;
-
 }
 
 :root {
@@ -22,25 +21,19 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: var(--bg-light);
-    /* Keeps your pattern but makes it subtle */
-    background-image: linear-gradient(rgba(244, 247, 246, 0.9), rgba(244, 247, 246, 0.9)), url('../img/pattern.png'); 
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-}
-
-body {
-    font-family: 'Montserrat', sans-serif;
     /* This ensures your original background shows through perfectly */
     background-color: transparent; 
     margin: 0;
-    padding: 40px 20px; /* Gives the card some breathing room from the top/bottom */
+    padding: 20px 20px; /* Gives the card some breathing room from the top/bottom */
     display: flex;
     justify-content: center;
     align-items: flex-start; /* Starts the card near the top but with a margin */
     min-height: 100vh;
+}
+
+.volver-inicio {
+	text-decoration: none;
+	color: #A9A9A9;
 }
 
 .container {
