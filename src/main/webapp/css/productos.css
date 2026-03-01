@@ -1,0 +1,148 @@
+@import url(estilos.css);
+
+@import url(variables.css);
+
+.principal {
+    border: 3px solid var(--primario);
+    justify-content: center;
+    align-items: center;
+    font-family: 'Montserrat', sans-serif;
+    justify-content: center;
+    align-items: center;
+
+}
+
+:root {
+    --primary: #2c3e50;
+    --accent: #3498db;
+    --success: #27ae60;
+    --bg-light: #f4f7f6;
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--bg-light);
+    /* Keeps your pattern but makes it subtle */
+    background-image: linear-gradient(rgba(244, 247, 246, 0.9), rgba(244, 247, 246, 0.9)), url('../img/pattern.png'); 
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    /* This ensures your original background shows through perfectly */
+    background-color: transparent; 
+    margin: 0;
+    padding: 40px 20px; /* Gives the card some breathing room from the top/bottom */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Starts the card near the top but with a margin */
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    /* This ensures the container stays centered */
+    margin: 0 auto; 
+}
+
+.card {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    /* A slightly stronger shadow helps the card 'lift' off a busy pattern */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); 
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Optional: a tiny border for extra crispness */
+}
+
+h2 {
+    color: var(--primary);
+    margin-top: 0;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+    padding-bottom: 5px;
+    margin-bottom: 25px;
+}
+
+/* Form Grid Logic */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns */
+    gap: 15px;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+input, textarea, select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.3s;
+}
+
+input:focus, textarea:focus {
+    border-color: var(--accent);
+}
+
+.category-section {
+    margin: 20px 0;
+}
+
+/* Buttons */
+button {
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    transition: transform 0.2s, background 0.3s;
+}
+
+.btn-primary {
+    background: var(--success);
+    color: white;
+    padding: 15px 30px;
+    width: 100%;
+}
+
+.btn-secondary {
+    background: var(--accent);
+    color: white;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+}
+
+button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background-color: #f9f9f9;
+}

@@ -30,7 +30,7 @@ async function populateCategories() {
     
     try {
         // Fetch data from the GetCategoriesServlet
-        const response = await fetch('./getCategories');
+        const response = await fetch('getCategories');
 		// Expects a JSON array
         const categories = await response.json();
 
