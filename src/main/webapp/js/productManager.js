@@ -26,9 +26,7 @@ document.getElementById('loadProducts').addEventListener('click', loadProducts);
  * ============================================================
  */
 
-/**
- * Fetches the list of categories from the server and populates the dropdown menu.
- */
+// Fetches the list of categories from the server and populates the dropdown menu //
 async function populateCategories() {
     const select = document.getElementById('catId');
     
