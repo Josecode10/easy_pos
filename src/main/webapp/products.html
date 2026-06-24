@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Easy POS - Add Product</title>
-    <script src="js/productManager.js" defer></script>
+    <!-- Product Manager Modules (load in order: API > Validator > UI) -->
+    <script src="js/productApi.js" defer></script>
+    <script src="js/productValidator.js" defer></script>
+    <script src="js/productUi.js" defer></script>
     <link rel="stylesheet" href="css/productos.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
